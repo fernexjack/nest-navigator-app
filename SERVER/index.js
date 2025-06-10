@@ -1,14 +1,38 @@
-// index.js (server klasöründe)
+// server/index.js
 require('dotenv').config();
-
 const express = require('express');
-const app = express();
-const PORT = process.env.PORT || 5001; // Port'u .env'den al, yoksa 5001 kullan
+const cors = require('cors');
+const db = require('./db');
 
-app.get('/api', (req, res) => {
-    res.json({ message: "Lifestyle Matchmaker API'sine hoş geldiniz!" });
+// Rota dosyalarını import et
+const authRoutes = require('./routes/auth');
+const propertyRoutes = require('./routes/properties');
+const favoriteRoutes = require('./routes/favorites'); // YENİ
+
+const app = express();
+const PORT = process.env.PORT || 5001;
+
+// ARA YAZILIMLAR (MIDDLEWARE)
+app.use(cors());
+app.use(express.json());
+
+// API ROTALARI
+app.use('/api/auth', authRoutes);
+app.use('/api/properties', propertyRoutes);
+app.use('/api/favorites', favoriteRoutes); // YENİ
+
+// Veritabanı test rotası
+app.get('/api/db-test', async (req, res) => {
+  try {
+    const data = await db.query('SELECT NOW()');
+    res.json({ message: "Veritabanı bağlantısı başarılı!", dbTime: data.rows[0].now });
+  } catch (err) {
+    console.error("VERİTABANI TEST HATASI:", err);
+    res.status(500).json({ error: "Veritabanı bağlantısında bir sorun oluştu." });
+  }
 });
 
+// Sunucuyu dinlemeye başla
 app.listen(PORT, () => {
-    console.log(`Sunucu http://localhost:${PORT} adresinde çalışıyor`);
+  console.log(`Sunucu http://localhost:${PORT} adresinde çalışıyor`);
 });

@@ -1,0 +1,90 @@
+.homepage-layout {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 82px); /* Navigasyon çubuğu yüksekliğini çıkar */
+}
+
+.filter-section {
+  padding: 10px 20px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #ddd;
+}
+
+.filter-section h1 {
+  margin: 0 0 15px 0;
+  font-size: 1.5rem;
+}
+
+.filter-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: center;
+}
+
+.main-filters, .advanced-filters {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.advanced-filters label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.filter-input {
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
+}
+
+.content-section {
+  display: flex;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+.property-list-container {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.property-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 20px;
+}
+
+.map-container {
+  flex: 1;
+  height: 100%;
+}
+
+.property-card-link { text-decoration: none; color: inherit; }
+.property-card {
+  border: 1px solid #ddd; border-radius: 8px; overflow: hidden;
+  width: 300px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s; position: relative;
+}
+.property-card:hover { transform: translateY(-5px); }
+.property-image { width: 100%; height: 200px; object-fit: cover; }
+.property-details { padding: 15px; }
+.property-details h3 { margin-top: 0; margin-bottom: 10px; font-size: 1.2rem; }
+.property-price { font-size: 1.4rem; font-weight: bold; color: #333; margin-bottom: 10px; }
+.property-address, .property-specs { color: #666; font-size: 0.9rem; margin-bottom: 5px; }
+
+.favorite-button {
+  position: absolute; top: 10px; right: 10px; background-color: rgba(255, 255, 255, 0.8);
+  border: none; border-radius: 50%; width: 40px; height: 40px;
+  font-size: 24px; color: #ccc; cursor: pointer; display: flex;
+  align-items: center; justify-content: center; z-index: 10;
+  transition: color 0.2s, transform 0.2s;
+}
+.favorite-button:hover { color: #ff8a8a; transform: scale(1.1); }
+.favorite-button.favorited { color: #ff0000; }

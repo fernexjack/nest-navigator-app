@@ -1,0 +1,7 @@
+Terminal 1'i aç:
+docker start nest-navigator-db
+cd server
+npm run dev
+Terminal 2'yi aç:
+cd client
+npm start
