@@ -1,30 +1,28 @@
-// client/src/api/index.js - TAM DOSYA İÇERİĞİ
+// client/src/api/index.js - HATA AYIKLAMA İÇİN GÜNCELLENMİŞ KOD
 
 import axios from 'axios';
 
-// Canlı ortam için Vercel'e ekleyeceğimiz ortam değişkenini (REACT_APP_API_URL) kullanır.
-// Eğer o değişken tanımlı değilse (yani yerel makinede çalışıyorsak), localhost'u kullanır.
+// --- BU BÖLÜMÜ DİKKATLİCE KONTROL EDELİM ---
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
 
-// Axios instance'ını bu dinamik URL ile oluşturur.
+// Tarayıcı konsoluna, hangi değişkenin okunduğunu ve nihai URL'yi yazdıralım.
+console.log("--- API Yapılandırması ---");
+console.log("process.env.REACT_APP_API_URL:", process.env.REACT_APP_API_URL);
+console.log("Nihai API_URL:", API_URL);
+console.log("--------------------------");
+
 const API = axios.create({ baseURL: API_URL });
 
-// Hata ayıklama için her isteğin nereye gittiğini konsola yazdıralım.
 API.interceptors.request.use(req => {
+    // Bu log'u da koruyalım
     console.log(`API isteği yapılıyor: ${req.method.toUpperCase()} ${req.baseURL}${req.url}`);
     return req;
 });
 
-/**
- * Mülkleri, verilen filtrelere göre backend'den çeken fonksiyon.
- * @param {object} filters - Filtreleme kriterlerini içeren nesne. 
- */
 export const fetchProperties = (filters) => {
     return API.get('/api/properties', { params: filters });
 };
 
-// Mevcut veya gelecekteki diğer API çağrılarınız...
-// export const fetchPropertyById = (id) => API.get(`/api/properties/${id}`);
-// export const createProperty = (newProperty) => API.post('/api/properties', newProperty);
+// ... diğer export'larınız ...
 
 export default API;
