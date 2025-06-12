@@ -1,11 +1,6 @@
 // server/index.js - TAM DOSYA İÇERİĞİ
 
 
-// .env dosyasındaki değişkenleri process.env'ye yükler
-require('dotenv').config(); 
-
-// Rotalarınızı import edin (dosya yollarını kendi projenize göre kontrol edin)
-
 const app = express();
 const PORT = process.env.PORT || 5001;
 
