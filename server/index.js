@@ -1,14 +1,10 @@
-// server/index.js - GEÇİCİ AMA KESİN ÇÖZÜM
+// server/index.js - YENİDEN HATA AYIKLAMA MODU
 
 const express = require('express');
 const cors = require('cors');
+// .env'yi her zaman yükle, Render zaten kendi değişkenlerini önceliklendirir.
+require('dotenv').config();
 
-// dotenv'i sadece 'production' olmayan ortamlarda çalıştır.
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config();
-}
-
-// Rotalarınızı import edin
 const propertiesRoutes = require('./routes/properties');
 const authRoutes = require('./routes/auth');
 const favoritesRoutes = require('./routes/favorites');
@@ -16,41 +12,25 @@ const favoritesRoutes = require('./routes/favorites');
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// --- EN ÖNEMLİ DEĞİŞİKLİK ---
-// Ortam değişkenini okumayı denemek yerine, izin verilecek adresleri
-// DOĞRUDAN KODUN İÇİNE YAZIYORUZ.
-const allowedOrigins = [
-    'http://localhost:3000',                      // Yerel geliştirme için
-    'https://nest-navigator-app.vercel.app'       // Vercel'deki frontend için
-];
-
-const corsOptions = {
-    origin: function (origin, callback) {
-        // Eğer gelen isteğin origin'i izin verilenler listesindeyse veya
-        // origin yoksa (Postman gibi araçlar için), izin ver.
-        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    optionsSuccessStatus: 200
-};
-
-app.use(cors(corsOptions));
+// CORS ayarını en basit hale getirelim, sorunun bu olmadığından emin olalım.
+app.use(cors()); 
 app.use(express.json());
 
-
-// Rota tanımlamaları (debug-env'i artık silebiliriz)
-app.get('/', (req, res) => {
-    res.send('Nest Navigator API is running with hardcoded CORS!');
+// --- YENİ HATA AYIKLAMA YOLU ---
+app.get('/debug-env', (req, res) => {
+    res.json({
+        NODE_ENV: process.env.NODE_ENV,
+        PORT: process.env.PORT,
+        // Bu sefer veritabanı URL'sinin ilk birkaç karakterini gösterelim
+        DATABASE_URL_START: process.env.DATABASE_URL ? process.env.DATABASE_URL.substring(0, 30) + '...' : null
+    });
 });
 
+// Rota tanımlamaları
 app.use('/api/properties', propertiesRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/favorites', favoritesRoutes);
 
-// Sunucuyu başlat
 app.listen(PORT, () => {
-    console.log(`Sunucu, ${PORT} portunda çalışıyor. CORS manuel olarak ayarlandı.`);
+    console.log(`Sunucu, ${PORT} portunda çalışıyor. Debug modu aktif.`);
 });
