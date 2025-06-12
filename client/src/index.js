@@ -1,7 +1,6 @@
 // server/index.js - TAM DOSYA İÇERİĞİ
 
-const express = require('express');
-const cors = require('cors');
+
 // .env dosyasındaki değişkenleri process.env'ye yükler
 require('dotenv').config(); 
 
