@@ -1,29 +1,44 @@
-// server/index.js - TAM DOSYA İÇERİĞİ
+// server/index.js - HATA AYIKLAMA VE KESİN ÇÖZÜM İÇİN GÜNCELLENDİ
 
 const express = require('express');
 const cors = require('cors');
-// .env dosyasındaki değişkenleri process.env'ye yükler
-require('dotenv').config(); 
 
-// Rotalarınızı import edin (dosya yollarını kendi projenize göre kontrol edin)
+// --- ÖNEMLİ DEĞİŞİKLİK ---
+// dotenv'i sadece 'production' (canlı) olmayan ortamlarda çalıştır.
+// Render, NODE_ENV'i otomatik olarak 'production' yapar.
+// Bu, Render'ın kendi ortam değişkenlerinin öncelikli olmasını sağlar.
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
+// Rotalarınızı import edin
 const propertiesRoutes = require('./routes/properties');
 const authRoutes = require('./routes/auth');
-const favoritesRoutes = require('./routes/favorites'); // Favori rotan varsa
+const favoritesRoutes = require('./routes/favorites');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// --- GÜNCELLENMİŞ CORS AYARLARI ---
-// Render'a ekleyeceğimiz CORS_ORIGIN değişkenini kullanır.
-// Eğer o değişken yoksa (yerel geliştirme), localhost:3000'e izin verir.
+// CORS AYARLARI (Değişiklik yok, hala aynı mantık)
 const corsOptions = {
     origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
     optionsSuccessStatus: 200
 };
 
-// Middleware'leri ayarla
-app.use(cors(corsOptions)); // Güncellenmiş cors ayarını kullan
-app.use(express.json());   // Gelen isteklerin body'sini JSON olarak parse et
+app.use(cors(corsOptions));
+app.use(express.json());
+
+// --- YENİ HATA AYIKLAMA YOLU ---
+// Bu yol, sunucunun hangi ortam değişkenlerini gördüğünü bize gösterecek.
+app.get('/debug-env', (req, res) => {
+    res.json({
+        NODE_ENV: process.env.NODE_ENV,
+        PORT: process.env.PORT,
+        CORS_ORIGIN: process.env.CORS_ORIGIN,
+        DATABASE_URL_IS_SET: !!process.env.DATABASE_URL, // Değeri değil, sadece var olup olmadığını gösterir
+    });
+});
+
 
 // Rota tanımlamaları
 app.get('/', (req, res) => {
@@ -32,10 +47,9 @@ app.get('/', (req, res) => {
 
 app.use('/api/properties', propertiesRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/favorites', favoritesRoutes); // Favori rotan varsa
-
+app.use('/api/favorites', favoritesRoutes);
 
 // Sunucuyu başlat
 app.listen(PORT, () => {
-     console.log(`Sunucu, ${PORT} portunda başarıyla yeniden başlatıldı ve çalışıyor!`);
+    console.log(`Sunucu, ${PORT} portunda başarıyla yeniden başlatıldı ve çalışıyor!`);
 });
