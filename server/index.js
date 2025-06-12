@@ -37,5 +37,5 @@ app.use('/api/favorites', favoritesRoutes); // Favori rotan varsa
 
 // Sunucuyu başlat
 app.listen(PORT, () => {
-    console.log(`Sunucu http://localhost:${PORT} adresinde çalışıyor`);
+     console.log(`Sunucu, ${PORT} portunda başarıyla yeniden başlatıldı ve çalışıyor!`);
 });
