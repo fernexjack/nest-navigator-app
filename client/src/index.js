@@ -1,32 +1,25 @@
-// server/index.js - TAM DOSYA İÇERİĞİ
+// client/src/index.js - TAMAMEN TEMİZLENMİŞ VE DOĞRU İÇERİK
 
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css'; // Kendi global CSS dosyanız
+import App from './App'; // Ana App componentiniz
+import { AuthProvider } from './context/AuthContext'; // AuthContext'iniz
+import { ChakraProvider } from '@chakra-ui/react'; // Chakra UI
 
-const app = express();
-const PORT = process.env.PORT || 5001;
+// Not: API ayarlarını artık client/src/api/index.js dosyasında yaptığımız için
+// burada axios ile ilgili bir kod olmasına gerek yok.
+// Eğer o dosyayı sildiyseniz ve ayarı burada yapmak istiyorsanız,
+// bir önceki cevaplarımdaki gibi axios ayarını buraya ekleyebilirsiniz.
+// Şimdilik en temiz haliyle bırakıyoruz.
 
-// --- GÜNCELLENMİŞ CORS AYARLARI ---
-// Render'a ekleyeceğimiz CORS_ORIGIN değişkenini kullanır.
-// Eğer o değişken yoksa (yerel geliştirme), localhost:3000'e izin verir.
-const corsOptions = {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-    optionsSuccessStatus: 200
-};
-
-// Middleware'leri ayarla
-app.use(cors(corsOptions)); // Güncellenmiş cors ayarını kullan
-app.use(express.json());   // Gelen isteklerin body'sini JSON olarak parse et
-
-// Rota tanımlamaları
-app.get('/', (req, res) => {
-    res.send('Nest Navigator API is running!');
-});
-
-app.use('/api/properties', propertiesRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/favorites', favoritesRoutes); // Favori rotan varsa
-
-
-// Sunucuyu başlat
-app.listen(PORT, () => {
-    console.log(`Sunucu http://localhost:${PORT} adresinde çalışıyor`);
-});
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <React.StrictMode>
+    <ChakraProvider>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </ChakraProvider>
+  </React.StrictMode>
+);
