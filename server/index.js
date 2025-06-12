@@ -1,38 +1,41 @@
-// server/index.js
-require('dotenv').config();
+// server/index.js - TAM DOSYA İÇERİĞİ
+
 const express = require('express');
 const cors = require('cors');
-const db = require('./db');
+// .env dosyasındaki değişkenleri process.env'ye yükler
+require('dotenv').config(); 
 
-// Rota dosyalarını import et
+// Rotalarınızı import edin (dosya yollarını kendi projenize göre kontrol edin)
+const propertiesRoutes = require('./routes/properties');
 const authRoutes = require('./routes/auth');
-const propertyRoutes = require('./routes/properties');
-const favoriteRoutes = require('./routes/favorites'); // YENİ
+const favoritesRoutes = require('./routes/favorites'); // Favori rotan varsa
 
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// ARA YAZILIMLAR (MIDDLEWARE)
-app.use(cors());
-app.use(express.json());
+// --- GÜNCELLENMİŞ CORS AYARLARI ---
+// Render'a ekleyeceğimiz CORS_ORIGIN değişkenini kullanır.
+// Eğer o değişken yoksa (yerel geliştirme), localhost:3000'e izin verir.
+const corsOptions = {
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    optionsSuccessStatus: 200
+};
 
-// API ROTALARI
-app.use('/api/auth', authRoutes);
-app.use('/api/properties', propertyRoutes);
-app.use('/api/favorites', favoriteRoutes); // YENİ
+// Middleware'leri ayarla
+app.use(cors(corsOptions)); // Güncellenmiş cors ayarını kullan
+app.use(express.json());   // Gelen isteklerin body'sini JSON olarak parse et
 
-// Veritabanı test rotası
-app.get('/api/db-test', async (req, res) => {
-  try {
-    const data = await db.query('SELECT NOW()');
-    res.json({ message: "Veritabanı bağlantısı başarılı!", dbTime: data.rows[0].now });
-  } catch (err) {
-    console.error("VERİTABANI TEST HATASI:", err);
-    res.status(500).json({ error: "Veritabanı bağlantısında bir sorun oluştu." });
-  }
+// Rota tanımlamaları
+app.get('/', (req, res) => {
+    res.send('Nest Navigator API is running!');
 });
 
-// Sunucuyu dinlemeye başla
+app.use('/api/properties', propertiesRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/favorites', favoritesRoutes); // Favori rotan varsa
+
+
+// Sunucuyu başlat
 app.listen(PORT, () => {
-  console.log(`Sunucu http://localhost:${PORT} adresinde çalışıyor`);
+    console.log(`Sunucu http://localhost:${PORT} adresinde çalışıyor`);
 });

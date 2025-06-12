@@ -1,31 +1,30 @@
-// client/src/api/index.js   <-- BU YENİ DOSYANIN İÇERİĞİ
+// client/src/api/index.js - TAM DOSYA İÇERİĞİ
+
 import axios from 'axios';
 
-// Backend sunucunuzun adresini tanımlıyoruz. 
-// Bu, gelecekte canlıya alırken tek bir yerden değiştirmeyi kolaylaştırır.
-const API = axios.create({ baseURL: 'http://localhost:5001' });
+// Canlı ortam için Vercel'e ekleyeceğimiz ortam değişkenini (REACT_APP_API_URL) kullanır.
+// Eğer o değişken tanımlı değilse (yani yerel makinede çalışıyorsak), localhost'u kullanır.
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+
+// Axios instance'ını bu dinamik URL ile oluşturur.
+const API = axios.create({ baseURL: API_URL });
+
+// Hata ayıklama için her isteğin nereye gittiğini konsola yazdıralım.
+API.interceptors.request.use(req => {
+    console.log(`API isteği yapılıyor: ${req.method.toUpperCase()} ${req.baseURL}${req.url}`);
+    return req;
+});
 
 /**
  * Mülkleri, verilen filtrelere göre backend'den çeken fonksiyon.
  * @param {object} filters - Filtreleme kriterlerini içeren nesne. 
- * Örn: { maxPrice: 500000, minBeds: 3, search: 'deniz manzaralı' }
  */
 export const fetchProperties = (filters) => {
-    // Axios'un `params` seçeneği, verdiğimiz nesneyi otomatik olarak 
-    // bir URL sorgu dizesine (query string) dönüştürür.
-    // Örnek: yukardaki `filters` nesnesi şuna dönüşür:
-    // /api/properties?maxPrice=500000&minBeds=3&search=deniz%20manzaral%C4%B1
-    
-    // Ayrıca, `filters` nesnesindeki değeri olmayan (undefined, null, veya boş string) 
-    // anahtarları otomatik olarak URL'e eklemez, bu da tam istediğimiz şey.
-    // Bu sayede backend'e sadece dolu olan filtreler gider.
-    
-    console.log("API'ye gönderilen filtreler:", filters); // Hata ayıklama için
-
     return API.get('/api/properties', { params: filters });
 };
 
-// Gelecekte buraya yeni API çağrıları ekleyebilirsiniz.
-// Örnek:
+// Mevcut veya gelecekteki diğer API çağrılarınız...
 // export const fetchPropertyById = (id) => API.get(`/api/properties/${id}`);
 // export const createProperty = (newProperty) => API.post('/api/properties', newProperty);
+
+export default API;
