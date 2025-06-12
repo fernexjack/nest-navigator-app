@@ -1,28 +1,24 @@
-// client/src/api/index.js - HATA AYIKLAMA İÇİN GÜNCELLENMİŞ KOD
+// client/src/api/index.js - YENİ AUTH FONKSİYONLARI EKLENDİ
 
 import axios from 'axios';
 
-// --- BU BÖLÜMÜ DİKKATLİCE KONTROL EDELİM ---
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
-
-// Tarayıcı konsoluna, hangi değişkenin okunduğunu ve nihai URL'yi yazdıralım.
-console.log("--- API Yapılandırması ---");
-console.log("process.env.REACT_APP_API_URL:", process.env.REACT_APP_API_URL);
-console.log("Nihai API_URL:", API_URL);
-console.log("--------------------------");
 
 const API = axios.create({ baseURL: API_URL });
 
+// Hata ayıklama için interceptor
 API.interceptors.request.use(req => {
-    // Bu log'u da koruyalım
     console.log(`API isteği yapılıyor: ${req.method.toUpperCase()} ${req.baseURL}${req.url}`);
     return req;
 });
 
-export const fetchProperties = (filters) => {
-    return API.get('/api/properties', { params: filters });
-};
+// --- İLAN FONKSİYONLARI ---
+export const fetchProperties = (filters) => API.get('/api/properties', { params: filters });
 
-// ... diğer export'larınız ...
+// --- YENİ: KİMLİK DOĞRULAMA (AUTH) FONKSİYONLARI ---
+export const registerUser = (userData) => API.post('/api/auth/register', userData);
+export const loginUser = (userData) => API.post('/api/auth/login', userData);
+
+// ...gelecekteki diğer fonksiyonlar...
 
 export default API;
