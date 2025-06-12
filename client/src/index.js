@@ -6,9 +6,6 @@ const cors = require('cors');
 require('dotenv').config(); 
 
 // Rotalarınızı import edin (dosya yollarını kendi projenize göre kontrol edin)
-const propertiesRoutes = require('./routes/properties');
-const authRoutes = require('./routes/auth');
-const favoritesRoutes = require('./routes/favorites'); // Favori rotan varsa
 
 const app = express();
 const PORT = process.env.PORT || 5001;
