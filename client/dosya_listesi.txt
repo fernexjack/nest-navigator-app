@@ -1,0 +1,10 @@
+.gitignore
+dosya_listesi.txt
+index.css
+node_modules
+package-lock.json
+package.json
+public
+README.md
+src
+yarn.lock

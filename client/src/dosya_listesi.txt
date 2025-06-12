@@ -1,0 +1,13 @@
+api
+App.css
+App.js
+App.test.js
+components
+context
+dosya_listesi.txt
+index.css
+index.js
+logo.svg
+pages
+reportWebVitals.js
+setupTests.js

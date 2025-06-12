@@ -1,0 +1,11 @@
+.env
+controllers
+data
+db.js
+dosya_listesi.txt
+index.js
+middleware
+node_modules
+package-lock.json
+package.json
+routes

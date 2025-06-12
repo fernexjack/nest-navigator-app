@@ -1,60 +1,64 @@
-// server/routes/favorites.js
+// server/routes/favorites.js (EN GÜVENLİ VE TEMİZ HALİ)
 const router = require('express').Router();
 const db = require('../db');
 const authMiddleware = require('../middleware/authMiddleware');
 
-// Bu rotadaki tüm endpoint'ler artık authMiddleware'den geçecek.
 router.use(authMiddleware);
 
-// GİRİŞ YAPMIŞ KULLANICININ FAVORİLERİNİ GETİR
+// Favori ilanların TÜM DETAYLARINI getirir.
+router.get('/details', async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const sqlQuery = `
+      SELECT p.* 
+      FROM properties AS p
+      INNER JOIN favorites AS f ON p.property_id = f.property_id
+      WHERE f.user_id = $1
+      ORDER BY f.created_at DESC`;
+      
+    const { rows } = await db.query(sqlQuery, [userId]);
+    res.json(rows);
+  } catch (err) {
+    console.error("Favori detayları alınırken hata:", err.message);
+    res.status(500).json({ error: 'Sunucu hatası.' });
+  }
+});
+
+// Sadece favori ilanların ID'lerini getirir.
 router.get('/', async (req, res) => {
   try {
-    const favorites = await db.query(
-      'SELECT property_id FROM favorites WHERE user_id = $1',
-      [req.user.userId]
-    );
-    res.json(favorites.rows.map(fav => fav.property_id));
-  } catch (err) {
-    console.error(err.message);
+    const userId = req.user.userId;
+    const { rows } = await db.query('SELECT property_id FROM favorites WHERE user_id = $1', [userId]);
+    res.json(rows.map(fav => fav.property_id));
+  } catch (err) { 
     res.status(500).send('Sunucu Hatası');
   }
 });
 
-// YENİ BİR FAVORİ EKLE
+// Yeni bir favori ekler.
 router.post('/', async (req, res) => {
-  const { propertyId } = req.body;
-  if (!propertyId) {
-    return res.status(400).json({ msg: 'propertyId gereklidir.' });
-  }
   try {
-    const newFavorite = await db.query(
-      'INSERT INTO favorites (user_id, property_id) VALUES ($1, $2) RETURNING *',
-      [req.user.userId, propertyId]
-    );
-    res.status(201).json(newFavorite.rows[0]);
+    const { propertyId } = req.body;
+    const userId = req.user.userId;
+    const { rows } = await db.query('INSERT INTO favorites (user_id, property_id) VALUES ($1, $2) RETURNING *', [userId, propertyId]);
+    res.status(201).json(rows[0]);
   } catch (err) {
-    if (err.code === '23505') {
-      return res.status(409).json({ msg: 'Bu ilan zaten favorilerinizde.' });
-    }
-    console.error(err.message);
+    if (err.code === '23505') return res.status(409).json({ msg: 'Bu ilan zaten favorilerinizde.' });
+    console.error("Favori eklenirken hata:", err);
     res.status(500).send('Sunucu Hatası');
   }
 });
 
-// BİR FAVORİYİ SİL
+// Bir favoriyi siler.
 router.delete('/:propertyId', async (req, res) => {
   try {
     const { propertyId } = req.params;
-    const deleteOp = await db.query(
-      'DELETE FROM favorites WHERE user_id = $1 AND property_id = $2',
-      [req.user.userId, propertyId]
-    );
-    if (deleteOp.rowCount === 0) {
-      return res.status(404).json({ msg: 'Silinecek favori bulunamadı.' });
-    }
+    const userId = req.user.userId;
+    const result = await db.query('DELETE FROM favorites WHERE user_id = $1 AND property_id = $2', [userId, propertyId]);
+    if (result.rowCount === 0) return res.status(404).json({ msg: 'Silinecek favori bulunamadı.' });
     res.json({ msg: 'Favori silindi.' });
   } catch (err) {
-    console.error(err.message);
+    console.error("Favori silinirken hata:", err);
     res.status(500).send('Sunucu Hatası');
   }
 });

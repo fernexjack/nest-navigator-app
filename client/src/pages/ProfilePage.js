@@ -1,60 +1,81 @@
-import React, { useContext, useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
+// client/src/pages/ProfilePage.js (EMPTYSTATE BİLEŞENİ İLE GÜNCELLENDİ)
+
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Box, Heading, Text, SimpleGrid, Image, VStack } from '@chakra-ui/react';
-import './HomePage.css'; // Kart stilleri için hala kullanabiliriz
+import { Box, Heading, Text, SimpleGrid, Spinner, Center, Alert, AlertIcon, AlertTitle, AlertDescription } from '@chakra-ui/react';
+import PropertyCard from '../components/PropertyCard';
+import EmptyState from '../components/EmptyState'; // Yeni bileşenimizi import ediyoruz
+import { FaRegHeart } from 'react-icons/fa'; // EmptyState için bir ikon import ediyoruz
 
 const ProfilePage = () => {
-  const { favorites } = useContext(AuthContext);
-  const [allProperties, setAllProperties] = useState([]);
+  const [favoriteProperties, setFavoriteProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchAllProperties = async () => {
+    const fetchFavoriteDetails = async () => {
+      setLoading(true);
+      setError('');
       try {
-        const res = await axios.get('/api/properties');
-        setAllProperties(res.data);
+        const res = await axios.get('/api/favorites/details');
+        setFavoriteProperties(res.data);
       } catch (err) {
-        setError('İlanlar yüklenirken bir hata oluştu.');
-        console.error("ProfilePage Error:", err);
+        setError('Favori ilanlar yüklenirken bir hata oluştu. Lütfen tekrar giriş yapmayı deneyin.');
+        console.error("ProfilePage Hata:", err.response?.data || err.message);
       } finally {
         setLoading(false);
       }
     };
-    fetchAllProperties();
+
+    fetchFavoriteDetails();
   }, []);
 
-  const favoriteProperties = allProperties.filter(property => 
-    favorites.includes(property.property_id)
-  );
+  if (loading) {
+    return (
+      <Center height="80vh">
+        <Spinner size="xl" />
+      </Center>
+    );
+  }
 
-  if (loading) return <Text>Yükleniyor...</Text>;
-  if (error) return <Text color="red.500">{error}</Text>;
+  // Hata durumunu da daha şık bir Alert bileşeni ile gösterelim
+  if (error) {
+    return (
+      <Center height="80vh" p={4}>
+        <Alert status="error" flexDirection="column" alignItems="center" justifyContent="center" textAlign="center" height="200px" borderRadius="lg">
+          <AlertIcon boxSize="40px" mr={0} />
+          <AlertTitle mt={4} mb={1} fontSize="lg">
+            Bir Hata Oluştu!
+          </AlertTitle>
+          <AlertDescription maxWidth="sm">
+            {error}
+          </AlertDescription>
+        </Alert>
+      </Center>
+    );
+  }
 
   return (
-    <Box p={5}>
-      <Heading mb={6}>Favori İlanlarım</Heading>
+    <Box p={8}>
+      <Heading as="h1" mb={8} textAlign="center">
+        Favori İlanlarım
+      </Heading>
       {favoriteProperties.length > 0 ? (
-        <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={10}>
+        <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing={6}>
           {favoriteProperties.map(property => (
-            <Link to={`/property/${property.property_id}`} key={property.property_id}>
-              <Box borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="md">
-                <Image src={property.image_url} alt={property.title} />
-                <Box p="6">
-                  <VStack align="start">
-                    <Heading size="md">{property.title}</Heading>
-                    <Text fontWeight="bold" fontSize="xl">${parseFloat(property.price).toLocaleString()}</Text>
-                    <Text>{property.address}</Text>
-                  </VStack>
-                </Box>
-              </Box>
-            </Link>
+            // PropertyCard'a burada onMouseEnter/Leave göndermiyoruz, bu yüzden hata vermeyecek
+            <PropertyCard key={property.property_id} property={property} />
           ))}
         </SimpleGrid>
       ) : (
-        <Text>Henüz favori ilanınız bulunmamaktadır.</Text>
+        // --- DEĞİŞİKLİK: Basit metin yerine yeni EmptyState bileşenini kullanıyoruz ---
+        <EmptyState 
+          icon={FaRegHeart}
+          title="Henüz Favoriniz Yok"
+          description="Beğendiğiniz ilanların yanındaki kalp ikonuna tıklayarak onları buraya ekleyebilirsiniz. Hayalinizdeki evi bulmaya başlayın!"
+          ctaText="İlanları Keşfet"
+          ctaLink="/" // Kullanıcıyı ana sayfaya yönlendiren buton
+        />
       )}
     </Box>
   );

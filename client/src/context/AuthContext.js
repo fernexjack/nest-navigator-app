@@ -1,3 +1,4 @@
+// client/src/context/AuthContext.js (EN GÜVENLİ VE TEMİZ HALİ)
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
@@ -8,15 +9,15 @@ const AuthProvider = ({ children }) => {
   const [favorites, setFavorites] = useState([]);
 
   const fetchFavorites = useCallback(async () => {
-    if (token) {
-      try {
-        const res = await axios.get('/api/favorites');
-        setFavorites(res.data);
-      } catch (err) {
-        console.error("Favoriler yüklenemedi", err);
-        setFavorites([]); // Hata durumunda favorileri boşalt
-      }
-    } else {
+    if (!token) {
+      setFavorites([]);
+      return;
+    }
+    try {
+      const res = await axios.get('/api/favorites'); // Sadece ID'leri çeker, bu doğru.
+      setFavorites(res.data);
+    } catch (err) {
+      console.error("AuthContext: Favoriler yüklenemedi.", err.response?.data || err);
       setFavorites([]);
     }
   }, [token]);
@@ -33,37 +34,36 @@ const AuthProvider = ({ children }) => {
     }
   }, [token, fetchFavorites]);
 
-  const login = (newToken) => {
-    setToken(newToken);
-  };
-
-  const logout = () => {
-    setToken(null);
-  };
+  const login = (newToken) => setToken(newToken);
+  const logout = () => setToken(null);
 
   const toggleFavorite = async (propertyId) => {
-    const isFavorited = favorites.includes(propertyId);
+    const isFav = favorites.map(String).includes(String(propertyId));
+    const originalFavorites = [...favorites]; // Hata durumunda geri dönmek için yedekle
+
+    // Optimistic Update
+    if (isFav) {
+      setFavorites(prev => prev.filter(id => String(id) !== String(propertyId)));
+    } else {
+      setFavorites(prev => [...prev, propertyId]);
+    }
+
+    // API Call
     try {
-      if (isFavorited) {
+      if (isFav) {
         await axios.delete(`/api/favorites/${propertyId}`);
-        setFavorites(prev => prev.filter(id => id !== propertyId));
       } else {
         await axios.post('/api/favorites', { propertyId });
-        setFavorites(prev => [...prev, propertyId]);
       }
     } catch (err) {
-      console.error("Favori durumu değiştirilemedi", err);
+      console.error("Favori işlemi başarısız, state geri alınıyor.", err.response?.data || err);
+      setFavorites(originalFavorites); // Hata olursa, state'i eski haline döndür
     }
   };
+  
+  const isFavorited = (propertyId) => favorites.map(String).includes(String(propertyId));
 
-  const contextValue = {
-    token,
-    login,
-    logout,
-    favorites,
-    toggleFavorite,
-    isFavorited: (propertyId) => favorites.includes(propertyId)
-  };
+  const contextValue = { token, login, logout, favorites, toggleFavorite, isFavorited };
 
   return (
     <AuthContext.Provider value={contextValue}>
